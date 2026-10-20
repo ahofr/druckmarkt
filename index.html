@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Druckmarkt">
+<meta name="theme-color" content="#1D2521">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Druckmarkt – Markttag</title>
+<style>
+:root { --bg:#E7EAE4; --paper:#F6F7F3; --ink:#1D2521; --muted:#646E68; --line:#CBD1C8; --pine:#2E5B4F; --pine-soft:#D5E0DA; --gold:#B48A2C; --gold-dark:#8E6C1E; --red:#A3412C; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; }
+body { font: 16px/1.4 -apple-system, "SF Pro Text", system-ui, sans-serif; color: var(--ink); background: var(--bg);
+  padding: env(safe-area-inset-top) 0 calc(env(safe-area-inset-bottom) + 84px); }
+header { position: sticky; top: 0; z-index: 5; background: var(--ink); color: #fff; padding: calc(env(safe-area-inset-top) + 10px) 16px 12px; margin-top: calc(-1 * env(safe-area-inset-top)); }
+header .row { display: flex; align-items: center; gap: 10px; }
+header h1 { font-size: 19px; margin: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+header .sub { font-size: 13px; color: #A9B3AD; margin-top: 2px; }
+.back { background: none; border: 0; color: #fff; font-size: 28px; line-height: 1; padding: 0 6px 0 0; }
+.mark { width: 22px; height: 22px; border-radius: 3px; background: repeating-linear-gradient(180deg, var(--gold) 0 3px, var(--gold-dark) 3px 4px); clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%); flex: none; }
+.stats { display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 8px; margin-top: 12px; }
+.stat { background: #26302B; border-radius: 10px; padding: 8px 10px; }
+.stat b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: #A9B3AD; }
+.kunden { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.kunden button { width: 40px; height: 40px; border-radius: 10px; border: 0; font-size: 22px; background: #3A4640; color: #fff; }
+.kunden button.plus { background: var(--gold); }
+main { padding: 12px 12px 0; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.card .info { flex: 1; min-width: 0; }
+.card .name { font-weight: 600; overflow-wrap: anywhere; }
+.card .var { color: var(--muted); font-size: 14px; }
+.card .meta { font-size: 13px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+.card.leer { opacity: .6; }
+.card .zahl { font-size: 26px; font-weight: 700; min-width: 40px; text-align: center; font-variant-numeric: tabular-nums; }
+.minus, .plus-gross { border: 0; border-radius: 12px; font-weight: 700; }
+.minus { width: 44px; height: 44px; font-size: 24px; background: #fff; border: 1px solid var(--line); color: var(--ink); }
+.plus-gross { width: 64px; height: 64px; font-size: 30px; background: var(--pine); color: #fff; }
+.plus-gross:active { background: #244A40; transform: scale(.96); }
+.ueber { color: var(--red); font-weight: 600; }
+.liste .card { cursor: pointer; }
+.btn { display: block; width: 100%; padding: 14px; border-radius: 12px; border: 0; font: 600 17px inherit; font-family: inherit; text-align: center; background: var(--pine); color: #fff; }
+.btn.ghost { background: transparent; color: var(--pine); border: 1px solid var(--pine); }
+.btn.danger { background: transparent; color: var(--red); border: 0; font-weight: 500; }
+input[type=file] { display: none; }
+h2 { font-size: 17px; margin: 22px 4px 10px; }
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+label input, label select, label textarea { display: block; width: 100%; margin-top: 4px; font: 17px -apple-system, system-ui, sans-serif; color: var(--ink); padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+label textarea { min-height: 80px; }
+.zweier { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fuss { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px); background: rgba(231,234,228,.95); border-top: 1px solid var(--line); z-index: 5; }
+.hinweis { color: var(--muted); font-size: 14px; padding: 4px 4px 12px; }
+.leerseite { text-align: center; padding: 40px 20px; color: var(--muted); }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 92px); transform: translateX(-50%); background: var(--ink); color: #fff; padding: 8px 14px; border-radius: 20px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 9; white-space: nowrap; }
+.toast.an { opacity: .95; }
+.suche { width: 100%; font-size: 17px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); margin-bottom: 10px; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="datei" accept=".json,application/json">
+<script>
+"use strict";
+/* Druckmarkt – Markttag-Modus fürs Handy.
+   Daten bleiben auf dem Gerät (localStorage). Austausch mit dem PC über JSON-Dateien. */
+const SPEICHER = "druckmarkt-handy-v1";
+let D = laden();
+let aktiv = null, suche = "";
+
+function laden() { try { return JSON.parse(localStorage.getItem(SPEICHER)) || { maerkte: {} }; } catch (e) { return { maerkte: {} }; } }
+function sichern() { try { localStorage.setItem(SPEICHER, JSON.stringify(D)); } catch (e) { toast("Speichern fehlgeschlagen – Speicher voll?"); } }
+const $ = (s) => document.querySelector(s);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const eur = (x) => (x || 0).toLocaleString("de-AT", { style: "currency", currency: "EUR" });
+const dat = (d) => (d ? new Date(d + "T00:00").toLocaleDateString("de-AT", { weekday: "short", day: "2-digit", month: "2-digit" }) : "");
+const zeit = (m) => dat(m.datum) + (m.datum_bis && m.datum_bis !== m.datum ? " – " + dat(m.datum_bis) : "");
+let tt; function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("an"); clearTimeout(tt); tt = setTimeout(() => el.classList.remove("an"), 1400); }
+
+function summen(mk) {
+  let stk = 0, ums = 0;
+  mk.positionen.forEach((p) => { stk += p.verkauft; ums += p.verkauft * (p.preis || 0); });
+  return { stk, ums };
+}
+
+/* ---------- Ansichten ---------- */
+function zeigen() {
+  const app = $("#app");
+  if (!aktiv || !D.maerkte[aktiv]) { aktiv = null; app.innerHTML = vListe(); return; }
+  app.innerHTML = vMarkt(D.maerkte[aktiv]);
+}
+
+function vListe() {
+  const ms = Object.values(D.maerkte).sort((a, b) => (b.markt.datum || "").localeCompare(a.markt.datum || ""));
+  return `<header><div class="row"><div class="mark"></div><h1>Druckmarkt – Markttag</h1></div></header>
+  <main class="liste">
+    ${ms.length ? ms.map((mk) => { const s = summen(mk); return `<div class="card" data-oeffnen="${esc(mk.markt.id)}">
+      <div class="info"><div class="name">${esc(mk.markt.name)}</div><div class="var">${esc(zeit(mk.markt))}${mk.markt.ort ? ", " + esc(mk.markt.ort) : ""}</div>
+      <div class="meta">${s.stk} verkauft, ${eur(s.ums)}</div></div><div style="font-size:24px;color:var(--muted)">›</div></div>`; }).join("")
+    : `<div class="leerseite">Noch kein Markt geladen.<br><br>Am PC beim Markt auf „Fürs Handy exportieren“ tippen und die Datei hier laden.</div>`}
+  </main>
+  <div class="fuss"><button class="btn" data-akt="laden">Markt laden</button></div>`;
+}
+
+function vMarkt(mk) {
+  const m = mk.markt, s = summen(mk);
+  const q = suche.toLowerCase();
+  const pos = mk.positionen.filter((p) => !q || (p.produkt + " " + p.variante).toLowerCase().includes(q));
+  return `<header>
+    <div class="row"><button class="back" data-akt="zurueck" aria-label="Zurück zur Liste">‹</button>
+      <div style="flex:1;min-width:0"><h1>${esc(m.name)}</h1><div class="sub">${esc(zeit(m))}${m.ort ? ", " + esc(m.ort) : ""}</div></div></div>
+    <div class="stats">
+      <div class="stat"><b>${eur(s.ums)}</b><span>Umsatz</span></div>
+      <div class="stat"><b>${s.stk}</b><span>Stück verkauft</span></div>
+      <div class="stat kunden"><div><b>${m.kunden || 0}</b><span>Kunden</span></div>
+        <button data-akt="kunde-" aria-label="Einen Kunden abziehen">−</button><button class="plus" data-akt="kunde+" aria-label="Einen Kunden zählen">+</button></div>
+    </div>
+  </header>
+  <main>
+    ${mk.positionen.length > 8 ? `<input class="suche" id="suche" type="search" placeholder="Produkt suchen" value="${esc(suche)}">` : ""}
+    ${pos.map((p) => { const rest = p.mitgenommen - p.verkauft; return `<div class="card ${rest <= 0 ? "leer" : ""}">
+      <div class="info"><div class="name">${esc(p.produkt)}</div>${p.variante ? `<div class="var">${esc(p.variante)}</div>` : ""}
+        <div class="meta">${p.preis != null ? eur(p.preis) + ", " : ""}${rest < 0 ? `<span class="ueber">${-rest} mehr als mitgenommen</span>` : `noch ${rest} von ${p.mitgenommen}`}</div></div>
+      <button class="minus" data-minus="${esc(p.id)}" aria-label="Verkauf abziehen">−</button>
+      <div class="zahl">${p.verkauft}</div>
+      <button class="plus-gross" data-plus="${esc(p.id)}" aria-label="Verkauf zählen: ${esc(p.produkt)}">+</button></div>`; }).join("")}
+    <h2>Markt-Infos</h2>
+    <div class="panel">
+      <div class="zweier">
+        <label>Besucher (geschätzt)<input id="f-besucher" data-feld="besucher" inputmode="numeric" value="${m.besucher ?? ""}"></label>
+        <label>Temperatur (°C)<input id="f-temperatur" data-feld="temperatur" inputmode="decimal" value="${m.temperatur ?? ""}"></label>
+      </div>
+      <label>Wetter<select id="f-wetter" data-feld="wetter"><option value=""></option>${(mk.wetterListe || []).concat(m.wetter && !(mk.wetterListe || []).includes(m.wetter) ? [m.wetter] : [])
+        .map((w) => `<option ${w === m.wetter ? "selected" : ""}>${esc(w)}</option>`).join("")}</select></label>
+      <label>Notiz vom Markttag<textarea id="f-notiz" data-feld="notiz" placeholder="Was lief gut, was wurde nachgefragt?">${esc(m.notiz)}</textarea></label>
+    </div>
+    <h2>Ergebnis</h2>
+    <p class="hinweis">Nach dem Markt „Ergebnis teilen“ tippen, die Datei z. B. in OneDrive sichern und am PC beim Markt mit „Handy-Ergebnis einlesen“ übernehmen.${mk.geteilt ? ` Zuletzt geteilt: ${new Date(mk.geteilt).toLocaleString("de-AT", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}.` : ""}</p>
+    <button class="btn danger" data-akt="entfernen">Markt vom Handy entfernen</button>
+  </main>
+  <div class="fuss"><button class="btn" data-akt="teilen">Ergebnis teilen</button></div>`;
+}
+
+/* ---------- Laden & Teilen ---------- */
+$("#datei").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f) return;
+  try {
+    const j = JSON.parse(await f.text());
+    if (j.typ !== "druckmarkt-markt" || !j.markt || !Array.isArray(j.positionen)) throw new Error();
+    const alt = D.maerkte[j.markt.id];
+    if (alt && summen(alt).stk > 0 && !confirm(`„${j.markt.name}“ ist schon geladen und hat ${summen(alt).stk} gezählte Verkäufe.\n\nMit der neuen Datei ersetzen? Die Zählung am Handy wird dann durch den Stand vom PC ersetzt.`)) return;
+    D.maerkte[j.markt.id] = { markt: j.markt, positionen: j.positionen.map((p) => ({ ...p, verkauft: p.verkauft || 0 })), wetterListe: j.wetterListe || [], geladen: new Date().toISOString() };
+    sichern(); aktiv = j.markt.id; suche = ""; zeigen(); window.scrollTo(0, 0); toast("Markt geladen");
+  } catch (err) { alert("Diese Datei ist keine Markt-Datei von Druckmarkt. Am PC beim Markt „Fürs Handy exportieren“ verwenden."); }
+});
+
+async function teilen(mk) {
+  const m = mk.markt;
+  const daten = { typ: "druckmarkt-ergebnis", version: 1, exportiert: new Date().toISOString(),
+    markt: { id: m.id, name: m.name, besucher: m.besucher ?? null, kunden: m.kunden ?? null, wetter: m.wetter || "", temperatur: m.temperatur ?? null, notiz: m.notiz || "" },
+    positionen: mk.positionen.map((p) => ({ id: p.id, produkt: p.produkt, variante: p.variante, verkauft: p.verkauft })) };
+  const name = `Ergebnis_${String(m.name).normalize("NFKD").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "_").slice(0, 40) || "Markt"}_${m.datum || ""}.json`;
+  const datei = new File([JSON.stringify(daten, null, 1)], name, { type: "application/json" });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [datei] })) await navigator.share({ files: [datei], title: name });
+    else { const a = document.createElement("a"); a.href = URL.createObjectURL(datei); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000); }
+    mk.geteilt = new Date().toISOString(); sichern(); zeigen();
+  } catch (err) { if (err && err.name !== "AbortError") alert("Teilen hat nicht geklappt: " + err.message); }
+}
+
+/* ---------- Bedienung ---------- */
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-akt],[data-plus],[data-minus],[data-oeffnen]");
+  if (!t) return;
+  const mk = aktiv && D.maerkte[aktiv];
+  if (t.dataset.oeffnen) { aktiv = t.dataset.oeffnen; suche = ""; zeigen(); window.scrollTo(0, 0); return; }
+  if (t.dataset.plus || t.dataset.minus) {
+    const p = mk.positionen.find((x) => x.id === (t.dataset.plus || t.dataset.minus));
+    if (t.dataset.plus) { p.verkauft++; toast(`+1 ${p.produkt}${p.variante ? " (" + p.variante + ")" : ""}`); }
+    else if (p.verkauft > 0) p.verkauft--;
+    sichern(); zeigen(); return;
+  }
+  switch (t.dataset.akt) {
+    case "laden": $("#datei").click(); break;
+    case "zurueck": aktiv = null; zeigen(); window.scrollTo(0, 0); break;
+    case "kunde+": mk.markt.kunden = (mk.markt.kunden || 0) + 1; sichern(); zeigen(); break;
+    case "kunde-": mk.markt.kunden = Math.max(0, (mk.markt.kunden || 0) - 1); sichern(); zeigen(); break;
+    case "teilen": teilen(mk); break;
+    case "entfernen":
+      if (!mk.geteilt && summen(mk).stk > 0 && !confirm("Das Ergebnis wurde noch nicht geteilt. Trotzdem entfernen? Die gezählten Verkäufe gehen verloren.")) return;
+      if (mk.geteilt && !confirm(`„${mk.markt.name}“ vom Handy entfernen?`)) return;
+      delete D.maerkte[aktiv]; aktiv = null; sichern(); zeigen(); break;
+  }
+});
+document.addEventListener("change", (e) => {
+  const f = e.target.dataset.feld; if (!f) return;
+  const m = D.maerkte[aktiv].markt, v = e.target.value.trim();
+  m[f] = ["besucher", "temperatur"].includes(f) ? (v === "" || !isFinite(Number(v.replace(",", "."))) ? null : Number(v.replace(",", "."))) : v;
+  sichern();
+});
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "suche") return;
+  suche = e.target.value; zeigen(); const el = $("#suche"); el.focus(); el.setSelectionRange(el.value.length, el.value.length);
+});
+
+zeigen();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>

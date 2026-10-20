@@ -1,0 +1,13 @@
+{
+  "name": "Druckmarkt – Markttag",
+  "short_name": "Druckmarkt",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#E7EAE4",
+  "theme_color": "#1D2521",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
