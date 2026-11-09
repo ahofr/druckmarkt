@@ -1,14 +1,24 @@
-// Offline-Cache für den Markttag-Modus. Bei neuer Version CACHE erhöhen.
-const CACHE = "druckmarkt-handy-1";
-const DATEIEN = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-512.png"];
-self.addEventListener("install", (e) => { e.waitUntil(caches.open(CACHE).then((c) => c.addAll(DATEIEN))); self.skipWaiting(); });
-self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))));
-  self.clients.claim();
+// Nur Cache-Einträge dieser Anwendung verwalten, niemals fremde Caches löschen.
+const CACHE = "druckmarkt-handy-3";
+const FILES = ["./", "index.html", "app.js", "manifest.webmanifest", "icon-180.png", "icon-512.png"];
+self.addEventListener("install", event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES.map(file => new Request(file, {cache:"reload"})))).then(() => self.skipWaiting()));
 });
-// Erst Netz (damit Updates ankommen), ohne Netz aus dem Cache – wichtig am Markt ohne Empfang
-self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
-  e.respondWith(fetch(e.request).then((r) => { const k = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, k)); return r; })
-    .catch(() => caches.match(e.request, { ignoreSearch: true }).then((r) => r || caches.match("index.html"))));
+self.addEventListener("activate", event => {
+  event.waitUntil(Promise.all([caches.delete("druckmarkt-handy-1"), caches.delete("druckmarkt-handy-2"), self.clients.claim()]));
+});
+self.addEventListener("fetch", event => {
+  const req = event.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url), scope = new URL(self.registration.scope);
+  if (url.origin !== scope.origin || !url.pathname.startsWith(scope.pathname)) return;
+  const allowed = FILES.map(file => new URL(file, scope).pathname);
+  if (!allowed.includes(url.pathname)) return;
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE);
+    const hit = await cache.match(req, {ignoreSearch:true});
+    if (hit) return hit;
+    if (req.mode === "navigate") { const page = await cache.match("index.html"); if (page) return page; }
+    return fetch(req);
+  })());
 });
